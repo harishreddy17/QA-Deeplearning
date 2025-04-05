@@ -26,26 +26,40 @@ def get_response():
         if not chatbot:
             return jsonify({
                 "response": "I apologize, but the chatbot is currently unavailable. Please try again later.",
-                "suggestions": []
+                "suggestions": [],
+                "state": None
             })
 
         user_message = request.json.get("message", "").strip()
+        state = request.json.get("state", None)
+        
+        print(f"Received state: {state}")  # Debug log
         
         if not user_message:
             return jsonify({
                 "response": "I didn't receive your message. Please try again.",
-                "suggestions": []
+                "suggestions": [],
+                "state": state
             })
 
         # Get response from the chatbot
-        result = chatbot.get_response(user_message)
+        result = chatbot.get_response(user_message, state)
+        
+        print(f"Chatbot response state: {result.get('state')}")  # Debug log
         
         # Ensure the response has the correct structure
         if not isinstance(result, dict):
-            result = {"response": str(result), "suggestions": []}
+            result = {
+                "response": str(result),
+                "suggestions": [],
+                "state": state
+            }
         
         if "suggestions" not in result:
             result["suggestions"] = []
+            
+        if "state" not in result:
+            result["state"] = state
 
         return jsonify(result)
 
@@ -54,7 +68,8 @@ def get_response():
         print(traceback.format_exc())
         return jsonify({
             "response": "I apologize, but I encountered an error processing your request. Please try again.",
-            "suggestions": []
+            "suggestions": [],
+            "state": state
         })
 
 @app.route("/set_name", methods=["POST"])

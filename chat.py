@@ -90,28 +90,70 @@ class PorscheBot:
         Fetch details about the car from the car data (from 'cars.json').
         """
         try:
+            # Clean up the input car name
+            car_name = car_name.lower().strip()
+            
             # First try exact match (case-insensitive)
             for model in self.car_data['models']:
-                if car_name.lower() == model['name'].lower():
+                if car_name == model['name'].lower():
                     return model
             
-            # If no exact match, try partial match with priority to longer names
-            matching_models = []
-            for model in self.car_data['models']:
-                model_name_parts = model['name'].lower().split()
-                input_parts = car_name.lower().split()
-                
-                # Count how many parts of the model name appear in the input
-                matching_parts = sum(1 for part in model_name_parts if part in input_parts)
-                
-                # Require at least 2 matching parts to avoid false positives
-                if matching_parts >= 2:
-                    matching_models.append((model, matching_parts, len(model_name_parts)))
+            # If no exact match, try to find the most specific match
+            best_match = None
+            best_score = 0
             
-            if matching_models:
-                # Sort by number of matching parts (descending) and then by model name length (descending)
-                matching_models.sort(key=lambda x: (-x[1], -x[2]))
-                return matching_models[0][0]
+            for model in self.car_data['models']:
+                model_name = model['name'].lower()
+                score = 0
+                
+                # Check if all words in the model name are present in the input
+                model_words = set(model_name.split())
+                input_words = set(car_name.split())
+                
+                # Count matching words
+                matching_words = model_words.intersection(input_words)
+                if len(matching_words) > 0:
+                    # Base score on number of matching words
+                    score = len(matching_words)
+                    
+                    # Bonus for exact model number match (e.g., "911")
+                    if any(word.isdigit() for word in matching_words):
+                        score += 2
+                    
+                    # Bonus for matching the full model name
+                    if model_name in car_name:
+                        score += 3
+                    
+                    # Special handling for GTS models
+                    if 'gts' in car_name and 'gts' in model_name:
+                        score += 2
+                        # Additional bonus for Carrera GTS
+                        if 'carrera' in car_name and 'carrera' in model_name:
+                            score += 2
+                    
+                    # Special handling for Carrera models
+                    if 'carrera' in car_name and 'carrera' in model_name:
+                        score += 1
+                        # Additional bonus for Carrera T
+                        if 't' in car_name and 't' in model_name:
+                            score += 2
+                    
+                    # Special handling for Turbo models
+                    if 'turbo' in car_name and 'turbo' in model_name:
+                        score += 2
+                    
+                    # Special handling for GT3 models
+                    if 'gt3' in car_name and 'gt3' in model_name:
+                        score += 2
+                    
+                    # Update best match if this is better
+                    if score > best_score:
+                        best_score = score
+                        best_match = model
+            
+            # Only return a match if we have a good confidence score
+            if best_score >= 2:
+                return best_match
             
             return None
         except Exception as e:
@@ -152,219 +194,266 @@ class PorscheBot:
             print(f"Error generating suggestions: {str(e)}")
             return []
 
-    def get_response(self, user_message):
+    def get_response(self, user_message, state=None):
         try:
-            # Check if user is asking about available models
-            if any(phrase in user_message.lower() for phrase in ['what models', 'which models', 'available models', 'car models', 'lineup']):
-                # Get all model names
-                model_names = [model['name'] for model in self.car_data['models']]
-                response = f"We offer the following Porsche models: {', '.join(model_names)}. Would you like to know more about any specific model? Visit 'https://www.porsche.com/usa/models/'"
-                suggestions = [f"Tell me about the {model}" for model in model_names[:4]]
-                return {
-                    'response': response,
-                    'suggestions': suggestions
+            # Initialize response components
+            response = ""
+            suggestions = []
+            
+            # Handle conversation state
+            if state is None:
+                state = {
+                    'isFirstInteraction': True,
+                    'hasProvidedName': False,
+                    'hasShownMainMenu': False,
+                    'selectedModel': None,
+                    'userName': None
                 }
             
-            # Check if user is asking about the most popular model
-            if any(phrase in user_message.lower() for phrase in ['most popular', 'popular model', 'best selling', 'favorite model']):
-                # Get the 911 Carrera as the most popular model
-                car_info = self.get_car_info('911 Carrera')
-                if car_info:
-                    response = f"""Our most popular model is the iconic 911 Carrera. This legendary sports car combines timeless design with cutting-edge technology:
-
-• Performance: {car_info['features']['power_PS']} PS ({car_info['features']['power_kW']} kW) of power
+            # First interaction - ask for name
+            if state['isFirstInteraction']:
+                state['isFirstInteraction'] = False
+                response = "Welcome to Porsche! I am your Virtual Assistant. May I know your name?"
+                suggestions = []
+                return {
+                    'response': response,
+                    'suggestions': suggestions,
+                    'state': state
+                }
+            
+            # If we have the user's name but haven't shown the main menu yet
+            if not state['hasProvidedName']:
+                state['hasProvidedName'] = True
+                state['userName'] = user_message.strip()
+                state['hasShownMainMenu'] = True
+                response = f"Hi {state['userName']}! How can we help you today?"
+                suggestions = [
+                    "Explore our models",
+                    "Find a dealership",
+                    "Schedule a test drive",
+                    "Learn about customization options"
+                ]
+                return {
+                    'response': response,
+                    'suggestions': suggestions,
+                    'state': state
+                }
+            
+            # Check if the message contains a model name and feature query
+            car_info = self.get_car_info(user_message)
+            if car_info:
+                # Handle specific feature queries
+                if 'engine' in user_message.lower() or 'motor' in user_message.lower():
+                    response = f"""The {car_info['name']} features a powerful {car_info['features']['cylinders']}-cylinder engine:
+• Displacement: {car_info['features']['displacement']}
+• Bore: {car_info['features']['bore']}
+• Stroke: {car_info['features']['stroke']}
+• Max Engine Speed: {car_info['features']['max_engine_speed']} rpm"""
+                elif 'transmission' in user_message.lower() or 'gearbox' in user_message.lower():
+                    response = f"The {car_info['name']} comes with a {car_info['features']['transmission']} transmission system."
+                elif 'fuel' in user_message.lower() or 'economy' in user_message.lower() or 'mileage' in user_message.lower():
+                    response = f"""The {car_info['name']} has the following fuel specifications:
+• Fuel Type: {car_info['features']['fuel_type']}
+• Fuel Economy: {car_info['features']['fuel_economy']}"""
+                elif 'warranty' in user_message.lower() or 'guarantee' in user_message.lower():
+                    response = f"The {car_info['name']} comes with a comprehensive {car_info['features']['warranty']} warranty."
+                elif 'dimensions' in user_message.lower() or 'size' in user_message.lower():
+                    response = f"""The {car_info['name']} has the following dimensions:
+• Length: {car_info['features']['length']}
+• Width: {car_info['features']['width']}
+• Height: {car_info['features']['height']}
+• Wheelbase: {car_info['features']['wheelbase']}"""
+                elif 'weight' in user_message.lower() or 'mass' in user_message.lower():
+                    response = f"The {car_info['name']} has a curb weight of {car_info['features']['curb_weight']}."
+                elif 'seats' in user_message.lower() or 'seating' in user_message.lower():
+                    response = f"The {car_info['name']} has a seating capacity of {car_info['features']['seating_capacity']}."
+                elif 'trunk' in user_message.lower() or 'boot' in user_message.lower() or 'storage' in user_message.lower():
+                    response = f"The {car_info['name']} offers {car_info['features']['trunk_volume']} of trunk space."
+                elif 'customization' in user_message.lower() or 'colors' in user_message.lower() or 'options' in user_message.lower():
+                    response = f"""The {car_info['name']} offers {car_info['features']['Customization Options']}. 
+Available colors include {', '.join(car_info['features']['available_colors'])}.
+You can explore these options and more at <a href='https://www.porsche.com' target='_blank'>porsche.com</a>"""
+                elif 'performance' in user_message.lower() or 'speed' in user_message.lower() or 'power' in user_message.lower():
+                    response = f"""The {car_info['name']} offers exceptional performance:
+• Power: {car_info['features']['power_PS']} PS ({car_info['features']['power_kW']} kW)
 • Acceleration: 0-60 mph in {car_info['features']['0-60 mph']}
 • Top Speed: {car_info['features']['Top Speed']}
-• Engine: {car_info['features']['cylinders']}-cylinder boxer engine
+• Max Torque: {car_info['features']['max_torque']}
+• Engine: {car_info['features']['cylinders']}-cylinder, {car_info['features']['displacement']}"""
+                elif 'price' in user_message.lower() or 'cost' in user_message.lower():
+                    response = f"The {car_info['name']} is priced between {car_info['features']['Price_Range']}."
+                else:
+                    # Default comprehensive feature overview
+                    response = f"""The {car_info['name']} is a high-performance sports car with the following features:
+• Engine: {car_info['features']['cylinders']}-cylinder, {car_info['features']['displacement']}
+• Power: {car_info['features']['power_PS']} PS ({car_info['features']['power_kW']} kW)
+• Acceleration: 0-60 mph in {car_info['features']['0-60 mph']}
+• Top Speed: {car_info['features']['Top Speed']}
 • Transmission: {car_info['features']['transmission']}
-
-Discover the perfect 911 Carrera for you. Visit 'https://www.porsche.com/usa/models/' """
+• Seating: {car_info['features']['seating_capacity']}
+• Trunk Space: {car_info['features']['trunk_volume']}
+• Available Colors: {', '.join(car_info['features']['available_colors'])}"""
+                
+                # Generate relevant suggestions based on the query
+                suggestions = [
+                    f"What's the price of the {car_info['name']}?",
+                    f"Tell me about the {car_info['name']}'s performance",
+                    f"What customization options are available for the {car_info['name']}?",
+                    f"What's the {car_info['name']}'s fuel economy?",
+                    f"What are the {car_info['name']}'s dimensions?",
+                    f"What's the {car_info['name']}'s warranty coverage?",
+                    "Back to models list",
+                    "Back to main menu"
+                ]
+                return {
+                    'response': response,
+                    'suggestions': suggestions,
+                    'state': state
+                }
+            
+            # Handle main menu selection
+            if state['hasShownMainMenu'] and not state['selectedModel']:
+                if 'models' in user_message.lower():
+                    # Get all model names
+                    model_names = [model['name'] for model in self.car_data['models']]
+                    response = "Here are our available models. Please select one to learn more:"
+                    suggestions = model_names + ["Back to main menu"]
+                    return {
+                        'response': response,
+                        'suggestions': suggestions,
+                        'state': state
+                    }
+                elif 'dealership' in user_message.lower():
+                    response = "You can find your nearest Porsche dealership at <a href='https://www.porsche.com' target='_blank'>porsche.com</a>"
+                    suggestions = ["Back to main menu", "Schedule a test drive"]
+                    return {
+                        'response': response,
+                        'suggestions': suggestions,
+                        'state': state
+                    }
+                elif 'test drive' in user_message.lower():
+                    response = "You can schedule a test drive at <a href='https://www.porsche.com' target='_blank'>porsche.com</a>"
+                    suggestions = ["Back to main menu", "Find a dealership"]
+                    return {
+                        'response': response,
+                        'suggestions': suggestions,
+                        'state': state
+                    }
+                elif 'customization' in user_message.lower():
+                    response = "You can explore our customization options at <a href='https://www.porsche.com' target='_blank'>porsche.com</a>"
+                    suggestions = ["Back to main menu", "Explore our models"]
+                    return {
+                        'response': response,
+                        'suggestions': suggestions,
+                        'state': state
+                    }
+                elif 'back to main menu' in user_message.lower():
+                    response = f"How can we help you today, {state['userName']}?"
                     suggestions = [
-                        "What's the price of the 911 Carrera?",
-                        "Tell me about the 911 Carrera's customization options",
-                        "Compare the 911 Carrera with other models",
-                        "Schedule a test drive for the 911 Carrera"
+                        "Explore our models",
+                        "Find a dealership",
+                        "Schedule a test drive",
+                        "Learn about customization options"
                     ]
                     return {
                         'response': response,
-                        'suggestions': suggestions
+                        'suggestions': suggestions,
+                        'state': state
                     }
             
-            # Analyze user message
-            entities = self.nlp.extract_entities(user_message)
-            sentiment = self.nlp.analyze_sentiment(user_message)
-            question_type = self.nlp.classify_question(user_message)
-            
-            # Initialize response components
-            response = ""
-            car_model = None
-            suggestions = []
-            
-            # Check for car model in entities
-            if 'car_model' in entities:
-                car_model = entities['car_model']
-                car_info = self.get_car_info(car_model)
-                
+            # Handle model selection
+            if state['hasShownMainMenu']:
+                # Check if the user selected a model
+                car_info = self.get_car_info(user_message)
                 if car_info:
-                    # Check for top speed query
-                    if any(word in user_message.lower() for word in ['top speed', 'maximum speed', 'max speed', 'how fast']):
-                        response = f"The {car_model} has a top speed of {car_info['features']['Top Speed']}."
-                    # Check for power query
-                    elif any(word in user_message.lower() for word in ['power', 'horsepower', 'hp', 'ps', 'kw', 'engine power']):
-                        response = f"The {car_model} has {car_info['features']['power_PS']} PS ({car_info['features']['power_kW']} kW) of power."
-                    # Check for acceleration query
-                    elif any(word in user_message.lower() for word in ['0-60', 'zero to sixty', 'acceleration', 'how fast']):
-                        response = f"The {car_model} accelerates from 0-60 mph in {car_info['features']['0-60 mph']}."
-                    # Check for color query
-                    elif any(word in user_message.lower() for word in ['color', 'colour', 'paint', 'exterior']):
-                        if 'available_colors' in car_info['features']:
-                            colors = car_info['features']['available_colors']
-                            if isinstance(colors, list):
-                                response = f"The {car_model} is available in the following colors: {', '.join(colors)}."
-                            else:
-                                response = f"The {car_model} is available in {colors}."
-                        else:
-                            response = f"I don't have specific color information for the {car_model}. Would you like to know about its performance or other features?"
-                    # Check for output per liter query
-                    elif any(word in user_message.lower() for word in ['output per liter', 'power per liter', 'specific output']):
-                        response = f"The {car_model} has a maximum output of {car_info['features']['max_output_per_liter_kW']} kW ({car_info['features']['max_output_per_liter_PS']} PS) per liter."
-                    # Check for engine speed query
-                    elif any(word in user_message.lower() for word in ['engine speed', 'rpm', 'revolution', 'max engine speed']):
-                        response = f"The {car_model} has a maximum engine speed of {car_info['features']['max_engine_speed']} rpm."
-                    # Check for stroke query
-                    elif any(word in user_message.lower() for word in ['stroke', 'piston stroke']):
-                        response = f"The {car_model} has a stroke of {car_info['features']['stroke']}."
-                    # Check for torque query
-                    elif any(word in user_message.lower() for word in ['torque', 'nm', 'newton meters']):
-                        response = f"The {car_model} produces {car_info['features']['max_torque']} of torque."
-                    # Check for bore size query
-                    elif any(word in user_message.lower() for word in ['bore', 'bore size', 'cylinder bore']):
-                        response = f"The {car_model} has a bore size of {car_info['features']['bore']}."
-                    # Check for displacement query
-                    elif any(word in user_message.lower() for word in ['displacement', 'engine size', 'capacity']):
-                        response = f"The {car_model} has an engine displacement of {car_info['features']['displacement']}."
-                    # Check for cylinder count query
-                    elif any(word in user_message.lower() for word in ['cylinder', 'cylinders', 'engine']):
-                        response = f"The {car_model} has a {car_info['features']['cylinders']}-cylinder engine."
-                    # Check for fuel type query
-                    elif any(word in user_message.lower() for word in ['fuel', 'gas', 'petrol', 'diesel', 'octane']):
-                        response = f"The {car_model} uses {car_info['features']['fuel_type']}."
-                    # Generate response based on question type
-                    elif question_type == 'performance':
-                        response = f"The {car_model} has {car_info['features']['power_PS']} PS ({car_info['features']['power_kW']} kW) of power, accelerates 0-60 mph in {car_info['features']['0-60 mph']}, and has a top speed of {car_info['features']['Top Speed']}."
-                    elif question_type == 'pricing':
-                        response = f"The {car_model} is priced between {car_info['features']['Price_Range']}."
-                    elif question_type == 'customization':
-                        response = f"The {car_model} offers {car_info['features']['Customization Options']}. Available colors include {', '.join(car_info['features']['available_colors'])}."
-                    else:
-                        response = f"The {car_model} is a high-performance sports car with {car_info['features']['power_PS']} PS of power and a top speed of {car_info['features']['Top Speed']}."
-                    
-                    # Generate suggestions based on the car model
+                    state['selectedModel'] = car_info['name']
+                    response = f"You've selected the {state['selectedModel']}. What would you like to know about it?"
                     suggestions = [
-                        f"What's the price of the {car_model}?",
-                        f"Tell me about the {car_model}'s performance.",
-                        f"What customization options are available for the {car_model}?",
-                        f"Compare the {car_model} with other models."
+                        f"What's the price of the {state['selectedModel']}?",
+                        f"Tell me about the {state['selectedModel']}'s performance",
+                        f"What customization options are available for the {state['selectedModel']}?",
+                        "Back to models list",
+                        "Back to main menu"
                     ]
-                else:
-                    # Handle special edition models by providing information about the base model
-                    base_model = None
-                    if 'turbo' in car_model.lower() and '50' in car_model.lower():
-                        base_model = '911 Turbo S'
-                    elif 'gt3' in car_model.lower() and 'touring' in car_model.lower():
-                        base_model = '911 GT3'
-                    elif 'carrera' in car_model.lower() and 'cabriolet' in car_model.lower():
-                        base_model = '911 Carrera 4 GTS'
-                    elif 'dakar' in car_model.lower():
-                        base_model = '911 Carrera 4 GTS'
-                    elif 'carrera s' in car_model.lower():
-                        base_model = '911 Carrera S'
-                    
-                    if base_model:
-                        car_info = self.get_car_info(base_model)
-                        if car_info:
-                            if any(word in user_message.lower() for word in ['top speed', 'maximum speed', 'max speed', 'how fast']):
-                                response = f"The {base_model} has a top speed of {car_info['features']['Top Speed']}. The {car_model} shares similar performance specifications."
-                            elif any(word in user_message.lower() for word in ['power', 'horsepower', 'hp', 'ps', 'kw', 'engine power']):
-                                response = f"The {base_model} has {car_info['features']['power_PS']} PS ({car_info['features']['power_kW']} kW) of power. The {car_model} shares similar engine specifications."
-                            elif any(word in user_message.lower() for word in ['0-60', 'zero to sixty', 'acceleration', 'how fast']):
-                                response = f"The {base_model} accelerates from 0-60 mph in {car_info['features']['0-60 mph']}. The {car_model} shares similar performance specifications."
-                            elif any(word in user_message.lower() for word in ['color', 'colour', 'paint', 'exterior']):
-                                if 'available_colors' in car_info['features']:
-                                    colors = car_info['features']['available_colors']
-                                    if isinstance(colors, list):
-                                        response = f"The {base_model} is available in the following colors: {', '.join(colors)}. The {car_model} shares similar color options."
-                                    else:
-                                        response = f"The {base_model} is available in {colors}. The {car_model} shares similar color options."
-                                else:
-                                    response = f"I don't have specific color information for the {car_model}, but I can tell you about the {base_model} which shares similar specifications. Would you like to know more about the {base_model}?"
-                            elif any(word in user_message.lower() for word in ['output per liter', 'power per liter', 'specific output']):
-                                response = f"The {base_model} has a maximum output of {car_info['features']['max_output_per_liter_kW']} kW ({car_info['features']['max_output_per_liter_PS']} PS) per liter. The {car_model} shares the same engine specifications."
-                            elif any(word in user_message.lower() for word in ['engine speed', 'rpm', 'revolution', 'max engine speed']):
-                                response = f"The {base_model} has a maximum engine speed of {car_info['features']['max_engine_speed']} rpm. The {car_model} shares the same engine specifications."
-                            elif any(word in user_message.lower() for word in ['stroke', 'piston stroke']):
-                                response = f"The {base_model} has a stroke of {car_info['features']['stroke']}. The {car_model} shares the same engine specifications."
-                            elif any(word in user_message.lower() for word in ['torque', 'nm', 'newton meters']):
-                                response = f"The {base_model} produces {car_info['features']['max_torque']} of torque. The {car_model} shares similar engine specifications."
-                            elif any(word in user_message.lower() for word in ['bore', 'bore size', 'cylinder bore']):
-                                response = f"The {base_model} has a bore size of {car_info['features']['bore']}. The {car_model} shares the same engine specifications."
-                            else:
-                                response = f"I don't have specific information about the {car_model}, but I can tell you about the {base_model} which shares similar specifications. Would you like to know more about the {base_model}?"
-                            suggestions = [
-                                f"What's the price of the {base_model}?",
-                                f"Tell me about the {base_model}'s performance.",
-                                f"What customization options are available for the {base_model}?",
-                                f"Compare the {base_model} with other models."
-                            ]
-                        else:
-                            response = "I'm sorry, I couldn't find information about that specific model. Would you like to know about our current lineup?"
-                            suggestions = [
-                                "What models do you offer?",
-                                "Tell me about your most popular model.",
-                                "What's your latest model?",
-                                "Show me your sports car lineup."
-                            ]
-                    else:
-                        response = "I'm sorry, I couldn't find information about that specific model. Would you like to know about our current lineup?"
-                        suggestions = [
-                            "What models do you offer?",
-                            "Tell me about your most popular model.",
-                            "What's your latest model?",
-                            "Show me your sports car lineup."
-                        ]
-            else:
-                # Handle general queries
-                for intent in self.intents:
-                    if any(pattern.lower() in user_message.lower() for pattern in intent['patterns']):
-                        response = random.choice(intent['responses'])
-                        suggestions = [
-                            "What models do you offer?",
-                            "Tell me about your most popular model.",
-                            "What's your latest model?",
-                            "Show me your sports car lineup."
-                        ]
-                        break
+                    return {
+                        'response': response,
+                        'suggestions': suggestions,
+                        'state': state
+                    }
                 
-                if not response:
-                    response = f"I'm here to help you explore our Porsche lineup. Would you like to know about our models, pricing, or features? Visit 'https://www.porsche.com/usa/models'"
-                    suggestions = [
-                        "What models do you offer?",
-                        "Tell me about your most popular model.",
-                        "What's your latest model?",
-                        "Show me your sports car lineup."
-                    ]
+                # Handle back to models list
+                if 'back to models list' in user_message.lower():
+                    state['selectedModel'] = None
+                    response = "Here are our available models. Please select one to learn more:"
+                    suggestions = [model['name'] for model in self.car_data['models']] + ["Back to main menu"]
+                    return {
+                        'response': response,
+                        'suggestions': suggestions,
+                        'state': state
+                    }
             
-            # Enhance response based on sentiment
-            response = self.nlp.enhance_response(response, sentiment)
+            # Handle specific model queries
+            if state['selectedModel']:
+                car_info = self.get_car_info(state['selectedModel'])
+                if car_info:
+                    if 'back to main menu' in user_message.lower():
+                        state['selectedModel'] = None
+                        response = f"How can we help you today, {state['userName']}?"
+                        suggestions = [
+                            "Explore our models",
+                            "Find a dealership",
+                            "Schedule a test drive",
+                            "Learn about customization options"
+                        ]
+                        return {
+                            'response': response,
+                            'suggestions': suggestions,
+                            'state': state
+                        }
+                    elif 'price' in user_message.lower() or 'cost' in user_message.lower():
+                        response = f"The {state['selectedModel']} is priced between {car_info['features']['Price_Range']}."
+                    elif 'performance' in user_message.lower():
+                        response = f"""The {state['selectedModel']} offers exceptional performance:
+• Power: {car_info['features']['power_PS']} PS ({car_info['features']['power_kW']} kW)
+• Acceleration: 0-60 mph in {car_info['features']['0-60 mph']}
+• Top Speed: {car_info['features']['Top Speed']}"""
+                    elif 'customization' in user_message.lower():
+                        response = f"The {state['selectedModel']} offers {car_info['features']['Customization Options']}. Available colors include {', '.join(car_info['features']['available_colors'])}."
+                    else:
+                        response = f"The {state['selectedModel']} is a high-performance sports car with {car_info['features']['power_PS']} PS of power and a top speed of {car_info['features']['Top Speed']}."
+                    
+                    suggestions = [
+                        f"What's the price of the {state['selectedModel']}?",
+                        f"Tell me about the {state['selectedModel']}'s performance",
+                        f"What customization options are available for the {state['selectedModel']}?",
+                        "Back to models list",
+                        "Back to main menu"
+                    ]
+                    return {
+                        'response': response,
+                        'suggestions': suggestions,
+                        'state': state
+                    }
+            
+            # Default response
+            response = f"I'm here to help you explore our Porsche lineup. Would you like to know about our models, pricing, or features? Visit <a href='https://www.porsche.com' target='_blank'>porsche.com</a>"
+            suggestions = [
+                "What models do you offer?",
+                "Tell me about your most popular model.",
+                "What's your latest model?",
+                "Show me your sports car lineup."
+            ]
             
             return {
                 'response': response,
-                'suggestions': suggestions
+                'suggestions': suggestions,
+                'state': state
             }
             
         except Exception as e:
             print(f"Error generating response: {str(e)}")
             return {
                 'response': "I apologize, but I encountered an error processing your request. Please try again or ask a different question.",
-                'suggestions': []
+                'suggestions': [],
+                'state': state
             }
