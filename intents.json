@@ -1,0 +1,194 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": [
+        "Hi",
+        "Hey",
+        "Hello",
+        "Good morning",
+        "Good afternoon",
+        "Good evening",
+        "How are you",
+        "What's up",
+        "How's it going"
+      ],
+      "responses": [
+        "Hello! Welcome to Porsche. How can I assist you today?",
+        "Hi there! I'm your Porsche assistant. What would you like to know?",
+        "Greetings! I'm here to help you explore our Porsche lineup. What interests you?"
+      ]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": [
+        "Bye",
+        "Goodbye",
+        "See you later",
+        "See you",
+        "Take care",
+        "Have a good day",
+        "Thanks for your help"
+      ],
+      "responses": [
+        "Thank you for visiting Porsche! Feel free to return if you have more questions.",
+        "Goodbye! We hope to see you at one of our dealerships soon.",
+        "Take care! Don't hesitate to reach out if you need more information."
+      ]
+    },
+    {
+      "tag": "thanks",
+      "patterns": [
+        "Thanks",
+        "Thank you",
+        "Thank you very much",
+        "Thanks a lot",
+        "Appreciate it",
+        "Much appreciated"
+      ],
+      "responses": [
+        "You're welcome! Is there anything else you'd like to know?",
+        "My pleasure! How else can I assist you?",
+        "Happy to help! What else interests you about our Porsche models?"
+      ]
+    },
+    {
+      "tag": "models",
+      "patterns": [
+        "What models do you offer",
+        "What cars do you have",
+        "Show me your models",
+        "List your cars",
+        "What Porsche models are available",
+        "Tell me about your lineup",
+        "What's in your lineup"
+      ],
+      "responses": [
+        "We offer a range of Porsche 911 models including the Carrera, Carrera S, Carrera 4 GTS, Turbo S, and GT3. Which model interests you?",
+        "Our current 911 lineup includes the Carrera, Carrera S, Carrera 4 GTS, Turbo S, and GT3. Would you like to know more about any specific model?",
+        "The Porsche 911 family includes several variants: Carrera, Carrera S, Carrera 4 GTS, Turbo S, and GT3. Which one would you like to explore?"
+      ]
+    },
+    {
+      "tag": "pricing",
+      "patterns": [
+        "How much does it cost",
+        "What's the price",
+        "What's the price range",
+        "How much is it",
+        "What's the cost",
+        "Tell me the price",
+        "Price information",
+        "Cost details"
+      ],
+      "responses": [
+        "The price varies by model. The Carrera starts at $101,200, Carrera S at $116,000, Carrera 4 GTS at $138,300, Turbo S at $203,500, and GT3 at $161,100. Would you like to know more about financing options?",
+        "Our models range from $101,200 for the Carrera to $203,500 for the Turbo S. We offer various financing and lease options. Would you like to explore those?",
+        "Prices start at $101,200 for the Carrera and go up to $203,500 for the Turbo S. We have flexible financing options available. Would you like to learn more?"
+      ]
+    },
+    {
+      "tag": "performance",
+      "patterns": [
+        "How fast is it",
+        "What's the top speed",
+        "What's the 0-60 time",
+        "How much power",
+        "What's the horsepower",
+        "Tell me about performance",
+        "Performance specs",
+        "Engine specs"
+      ],
+      "responses": [
+        "Performance varies by model. The Carrera has 385 PS, the Carrera S 450 PS, the Carrera 4 GTS 480 PS, the Turbo S 650 PS, and the GT3 510 PS. Would you like specific details about any model?",
+        "Our models offer exceptional performance. The Carrera accelerates 0-60 mph in 4.0 seconds, while the Turbo S achieves it in just 2.6 seconds. Which model's performance interests you?",
+        "Each model offers unique performance characteristics. The GT3 revs to 9000 RPM, while the Turbo S delivers 800 Nm of torque. Would you like to know more about a specific model?"
+      ]
+    },
+    {
+      "tag": "customization",
+      "patterns": [
+        "What options are available",
+        "How can I customize it",
+        "What customization options",
+        "Tell me about options",
+        "What can I change",
+        "Customization details",
+        "Available options"
+      ],
+      "responses": [
+        "We offer extensive customization through our Exclusive Manufaktur program, including Paint to Sample, Interior Packages, and model-specific options. Which model would you like to customize?",
+        "You can personalize your Porsche with various options including exterior colors, interior packages, and performance upgrades. Would you like to explore the options for a specific model?",
+        "Our customization options include exclusive colors, interior packages, and performance enhancements. Each model has unique options available. Which model interests you?"
+      ]
+    },
+    {
+      "tag": "test_drive",
+      "patterns": [
+        "Can I test drive",
+        "How to test drive",
+        "Schedule test drive",
+        "Book test drive",
+        "Test drive information",
+        "Want to test drive",
+        "Test drive options"
+      ],
+      "responses": [
+        "We'd be happy to arrange a test drive! We have dealerships in New York and Beverly Hills. Would you like to schedule a test drive at either location?",
+        "Test drives are available at our dealerships. We have locations in New York and Beverly Hills, both offering the Porsche Experience. Which location works best for you?",
+        "You can schedule a test drive at our dealerships in New York or Beverly Hills. Both locations offer the full Porsche Experience. Would you like to book a test drive?"
+      ]
+    },
+    {
+      "tag": "financing",
+      "patterns": [
+        "What financing options",
+        "How can I finance",
+        "Tell me about financing",
+        "Payment options",
+        "Lease options",
+        "Financing details",
+        "Payment plans"
+      ],
+      "responses": [
+        "We offer standard financing with terms from 36-72 months starting at 2.9% APR, and lease programs from 24-36 months starting at $1,299 monthly. Would you like more details?",
+        "Our financing options include standard loans and lease programs. We can work with various credit situations. Would you like to explore which option might work best for you?",
+        "We have flexible financing solutions including loans and leases. Our team can help you find the best option for your situation. Would you like to learn more?"
+      ]
+    },
+    {
+      "tag": "maintenance",
+      "patterns": [
+        "What about maintenance",
+        "Maintenance costs",
+        "Service information",
+        "Warranty details",
+        "Service packages",
+        "Maintenance plans",
+        "Service options"
+      ],
+      "responses": [
+        "We offer maintenance packages starting at $2,500 for basic service and $4,500 for premium coverage, both covering 4 years/50,000 miles. Would you like details about what's included?",
+        "Our maintenance packages include comprehensive service coverage. The basic package starts at $2,500, while the premium package at $4,500 includes additional services. Would you like to know more?",
+        "We provide maintenance packages with different levels of coverage. All packages include essential services and extend for 4 years/50,000 miles. Would you like to explore the options?"
+      ]
+    },
+    {
+      "tag": "dealership",
+      "patterns": [
+        "Where are your dealerships",
+        "Find a dealer",
+        "Dealer locations",
+        "Nearest dealership",
+        "Showroom locations",
+        "Dealership information",
+        "Where to buy"
+      ],
+      "responses": [
+        "We have dealerships in New York and Beverly Hills. Both locations offer sales, service, parts, and test drives. The Beverly Hills location also features a Porsche Experience Center. Which location would you like to visit?",
+        "Our dealerships are located in New York and Beverly Hills. Both are open Monday through Saturday 9AM-7PM and Sunday 11AM-5PM. Would you like to schedule a visit?",
+        "You can visit our dealerships in New York or Beverly Hills. Both offer comprehensive services and the Beverly Hills location includes a Porsche Experience Center. Which location would you prefer?"
+      ]
+    }
+  ]
+}

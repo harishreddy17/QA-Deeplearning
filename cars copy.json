@@ -1,0 +1,276 @@
+{
+  "models": {
+    "911 Carrera": {
+      "features": [
+        "Fuel-efficient",
+        "Automatic transmission",
+        "Bluetooth connectivity",
+        "LED headlights",
+        "Apple CarPlay compatibility"
+      ],
+      "price": "$20,000",
+      "availability": "In Stock",
+      "dealership": {
+        "location": "123 Toyota Ave, Springfield",
+        "contact": "+1-800-123-4567",
+        "website": "https://toyota-springfield.com"
+      }
+    },
+    "911 Carrera 4 GTS": {
+      "features": [
+        "Sporty design",
+        "Fuel-efficient",
+        "Apple CarPlay",
+        "Bluetooth connectivity",
+        "Lane departure warning"
+      ],
+      "price": "$22,000",
+      "availability": "In Stock",
+      "dealership": {
+        "location": "456 Honda Blvd, Shelby",
+        "contact": "+1-800-987-6543",
+        "website": "https://honda-shelby.com"
+      }
+    },
+    "911 Carrera S": {
+      "features": [
+        "Luxury SUV",
+        "All-wheel drive",
+        "Leather seats",
+        "Navigation system",
+        "Premium audio"
+      ],
+      "price": "$50,000",
+      "availability": "Out of Stock",
+      "dealership": {
+        "location": "789 Luxury Cars Blvd, Beverly Hills",
+        "contact": "+1-800-111-2222",
+        "website": "https://bmw-beverlyhills.com"
+      }
+    },
+    "911 Carrera GTS": {
+      "features": [
+        "Electric vehicle",
+        "Autopilot",
+        "Fast charging",
+        "Minimalistic interior",
+        "Advanced infotainment system"
+      ],
+      "price": "$40,000",
+      "availability": "In Stock",
+      "dealership": {
+        "location": "123 Electric Ave, Silicon Valley",
+        "contact": "+1-800-555-9999",
+        "website": "https://tesla-siliconvalley.com"
+      }
+    },
+    {
+      "911 Carrera T"
+      "engine": {
+        "cylinders": 6,
+        "bore": 91.0,
+        "stroke": 76.4,
+        "displacement": 2981,
+        "power_kW": 290,
+        "power_PS": 394,
+        "max_engine_speed": 7500,
+        "max_torque": 450,
+        "max_output_per_liter_kW": 96.00,
+        "max_output_per_liter_PS": 131.00
+      }
+    },
+    {
+      "911 Carrera Cabriolet"
+      "engine": {
+        "cylinders": 6,
+        "bore": 91.0,
+        "stroke": 76.4,
+        "displacement": 2981,
+        "power_kW": 290,
+        "power_PS": 394,
+        "max_engine_speed": 7500,
+        "max_torque": 450,
+        "max_output_per_liter_kW": 96.00,
+        "max_output_per_liter_PS": 131.00
+      }
+    },
+    {
+      "name": "911 Carrera S Cabriolet",
+      "engine": {
+        "cylinders": 6,
+        "bore": 91.0,
+        "stroke": 76.4,
+        "displacement": 2981,
+        "power_kW": 353,
+        "power_PS": 480,
+        "max_engine_speed": 7500,
+        "max_torque": 530,
+        "max_output_per_liter_kW": 118.00,
+        "max_output_per_liter_PS": 161.00
+      }
+    },
+    {
+      "name": "911 Carrera GTS Cabriolet",
+      "engine": {
+        "cylinders": 6,
+        "bore": 97.0,
+        "stroke": 81.0,
+        "displacement": 3591,
+        "power_kW": 357,
+        "power_PS": 485,
+        "max_engine_speed": 7500,
+        "max_torque": 570,
+        "power_combined_kW": 398,
+        "power_electric_motor_kW": 41,
+        "power_combined_PS": 541,
+        "torque_combined": 610,
+        "max_output_per_liter_kW": 99.00,
+        "max_output_per_liter_PS": 135.00
+      }
+    },
+    {
+      "name": "911 Carrera 4 GTS Cabriolet",
+      "engine": {
+        "cylinders": 6,
+        "bore": 97.0,
+        "stroke": 81.0,
+        "displacement": 3591,
+        "power_kW": 357,
+        "power_PS": 485,
+        "max_engine_speed": 7500,
+        "max_torque": 570,
+        "power_combined_kW": 398,
+        "power_electric_motor_kW": 41,
+        "power_combined_PS": 541,
+        "torque_combined": 610,
+        "max_output_per_liter_kW": 99.00,
+        "max_output_per_liter_PS": 135.00
+      }
+    },
+    {
+      "name": "911 Carrera T Cabriolet",
+      "engine": {
+        "cylinders": 6,
+        "bore": 91.0,
+        "stroke": 76.4,
+        "displacement": 2981,
+        "power_kW": 290,
+        "power_PS": 394,
+        "max_engine_speed": 7500,
+        "max_torque": 450,
+        "max_output_per_liter_kW": 96.00,
+        "max_output_per_liter_PS": 131.00
+      }
+    },
+    {
+      "name": "911 Targa 4 GTS",
+      "engine": {
+        "cylinders": 6,
+        "bore": 97.0,
+        "stroke": 81.0,
+        "displacement": 3591,
+        "power_kW": 357,
+        "power_PS": 485,
+        "max_engine_speed": 7500,
+        "max_torque": 570,
+        "power_combined_kW": 398,
+        "power_electric_motor_kW": 41,
+        "power_combined_PS": 541,
+        "torque_combined": 610,
+        "max_output_per_liter_kW": 99.00,
+        "max_output_per_liter_PS": 135.00
+      }
+    },
+    {
+      "name": "911 Turbo 50 Years",
+      "engine": {
+        "cylinders": 6,
+        "bore": 102.0,
+        "stroke": 76.4,
+        "displacement": 3745,
+        "power_kW": 478,
+        "power_PS": 650,
+        "max_engine_speed": 7200,
+        "max_torque": 800,
+        "max_output_per_liter_kW": 128.00,
+        "max_output_per_liter_PS": 174.00
+      }
+    },
+    {
+      "name": "911 GT3",
+      "engine": {
+        "cylinders": 6,
+        "bore": 102.0,
+        "stroke": 81.5,
+        "displacement": 3996,
+        "power_kW": 375,
+        "power_PS": 510,
+        "max_engine_speed": 9000,
+        "max_torque": 450,
+        "max_output_per_liter_kW": 93.00,
+        "max_output_per_liter_PS": 127.00
+      }
+    },
+    {
+      "name": "911 GT3 with Touring Package",
+      "engine": {
+        "cylinders": 6,
+        "bore": 102.0,
+        "stroke": 81.5,
+        "displacement": 3996,
+        "power_kW": 375,
+        "power_PS": 510,
+        "max_engine_speed": 9000,
+        "max_torque": 450,
+        "max_output_per_liter_kW": 93.00,
+        "max_output_per_liter_PS": 127.00
+      }
+    },
+    {
+      "name": "911 GT3 RS",
+      "engine": {
+        "cylinders": 6,
+        "bore": 102.0,
+        "stroke": 81.5,
+        "displacement": 3996,
+        "power_kW": 386,
+        "power_PS": 525,
+        "max_engine_speed": 9000,
+        "max_torque": 465,
+        "max_output_per_liter_kW": 96.00,
+        "max_output_per_liter_PS": 131.00
+      }
+    },
+    {
+      "name": "911 Dakar",
+      "engine": {
+        "cylinders": 6,
+        "bore": 91.0,
+        "stroke": 76.4,
+        "displacement": 2981,
+        "power_kW": 353,
+        "power_PS": 480,
+        "max_engine_speed": 7500,
+        "max_torque": 570,
+        "max_output_per_liter_kW": 118.00,
+        "max_output_per_liter_PS": 161.00
+      }
+    },
+    {
+      "name": "911 S/T",
+      "engine": {
+        "cylinders": 6,
+        "bore": 102.0,
+        "stroke": 81.5,
+        "displacement": 3996,
+        "power_kW": 386,
+        "power_PS": 525,
+        "max_engine_speed": 9000,
+        "max_torque": 465,
+        "max_output_per_liter_kW": 96.00,
+        "max_output_per_liter_PS": 131.00
+      }
+    }
+  ]
+}
+
